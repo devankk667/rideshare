@@ -8,6 +8,8 @@ import authRoutes from './routes/authRoutes';
 import passengerRoutes from './routes/passengerRoutes';
 import driverRoutes from './routes/driverRoutes';
 import rideRoutes from './routes/rideRoutes';
+import adminRoutes from './routes/adminRoutes';
+import paymentRoutes from './routes/paymentRoutes';
 
 dotenv.config();
 
@@ -34,6 +36,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/passengers', passengerRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/rides', rideRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

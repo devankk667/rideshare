@@ -7,10 +7,12 @@ import db from '../config/db';
 export const register = async (req: Request, res: Response) => {
   try {
     const { fullName, email, password, phone, userType } = req.body;
-    
+
     // Check if user already exists
     const [users] = await db.query(
-      'SELECT * FROM PASSENGERS WHERE email = ? UNION SELECT * FROM DRIVERS WHERE email = ?',
+      `SELECT Passenger_ID as id, Full_Name as fullName, Email as email, Password as password, Phone as phone, 'passenger' as role, NULL as licenseNo FROM PASSENGERS WHERE email = ? 
+       UNION 
+       SELECT Driver_ID as id, Full_Name as fullName, Email as email, Password as password, Phone as phone, 'driver' as role, License_No as licenseNo FROM DRIVERS WHERE email = ?`,
       [email, email]
     ) as any[];
 
@@ -28,7 +30,7 @@ export const register = async (req: Request, res: Response) => {
         'INSERT INTO PASSENGERS (Full_Name, Email, Phone, Password) VALUES (?, ?, ?, ?)',
         [fullName, email, phone, hashedPassword]
       ) as any[];
-      
+
       // Create JWT token
       const payload = {
         user: {
@@ -43,7 +45,16 @@ export const register = async (req: Request, res: Response) => {
         { expiresIn: '7d' },
         (err, token) => {
           if (err) throw err;
-          res.json({ token });
+          res.json({
+            token,
+            user: {
+              id: result.insertId,
+              fullName,
+              email,
+              phone,
+              role: 'passenger'
+            }
+          });
         }
       );
     } else if (userType === 'driver') {
@@ -52,7 +63,7 @@ export const register = async (req: Request, res: Response) => {
         'INSERT INTO DRIVERS (Full_Name, Email, Phone, License_No, Password) VALUES (?, ?, ?, ?, ?)',
         [fullName, email, phone, licenseNo, hashedPassword]
       ) as any[];
-      
+
       // Create JWT token
       const payload = {
         user: {
@@ -67,15 +78,25 @@ export const register = async (req: Request, res: Response) => {
         { expiresIn: '7d' },
         (err, token) => {
           if (err) throw err;
-          res.json({ token });
+          res.json({
+            token,
+            user: {
+              id: result.insertId,
+              fullName,
+              email,
+              phone,
+              licenseNo,
+              role: 'driver'
+            }
+          });
         }
       );
     } else {
       return res.status(400).json({ message: 'Invalid user type' });
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
-    res.status(500).send('Server error');
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
@@ -86,7 +107,9 @@ export const login = async (req: Request, res: Response) => {
 
     // Check if user exists in either passengers or drivers table
     const [users] = await db.query(
-      'SELECT * FROM PASSENGERS WHERE email = ? UNION SELECT * FROM DRIVERS WHERE email = ?',
+      `SELECT Passenger_ID as id, Full_Name as fullName, Email as email, Password as password, Phone as phone, 'passenger' as role, NULL as licenseNo FROM PASSENGERS WHERE email = ? 
+       UNION 
+       SELECT Driver_ID as id, Full_Name as fullName, Email as email, Password as password, Phone as phone, 'driver' as role, License_No as licenseNo FROM DRIVERS WHERE email = ?`,
       [email, email]
     ) as any[];
 
@@ -95,20 +118,17 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const user = users[0];
-    const isMatch = await bcrypt.compare(password, user.Password);
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Determine user type
-    const userType = 'License_No' in user ? 'driver' : 'passenger';
-
     // Create JWT payload
     const payload = {
       user: {
-        id: user.Passenger_ID || user.Driver_ID,
-        type: userType
+        id: user.id,
+        type: user.role
       }
     };
 
@@ -119,20 +139,22 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '7d' },
       (err, token) => {
         if (err) throw err;
-        res.json({ 
+        res.json({
           token,
           user: {
-            id: user.Passenger_ID || user.Driver_ID,
-            name: user.Full_Name,
-            email: user.Email,
-            type: userType
+            id: user.id,
+            fullName: user.fullName,
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+            ...(user.role === 'driver' && { licenseNo: user.licenseNo })
           }
         });
       }
     );
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
-    res.status(500).send('Server error');
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
@@ -141,7 +163,7 @@ export const getMe = async (req: any, res: Response) => {
   try {
     const userId = req.user.id;
     const userType = req.user.type;
-    
+
     let user;
     if (userType === 'passenger') {
       const [rows] = await db.query(

@@ -10,11 +10,16 @@ export interface AuthRequest extends Request {
 
 const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   // Get token from header
-  const token = req.header('x-auth-token');
+  const tokenHeader = req.header('x-auth-token') || req.header('Authorization');
 
   // Check if no token
-  if (!token) {
+  if (!tokenHeader) {
     return res.status(401).json({ message: 'No token, authorization denied' });
+  }
+
+  let token = tokenHeader;
+  if (tokenHeader.startsWith('Bearer ')) {
+    token = tokenHeader.slice(7, tokenHeader.length);
   }
 
   // Verify token

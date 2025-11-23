@@ -1,14 +1,6 @@
 # Dependencies
 node_modules/
-.pnp
-.pnp.js
-
-# Testing
-coverage/
-
-# Production
-dist/
-build/
+package-lock.json
 
 # Environment variables
 .env
@@ -17,53 +9,25 @@ build/
 .env.test.local
 .env.production.local
 
-# Logs
-logs
+# Build outputs
+dist/
+build/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
 
-# Editor directories and files
-.idea
-.vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
+Thumbs.db
 
-# TypeScript cache
-*.tsbuildinfo
+# Temporary files
+*.tmp
+.cache/
 
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variable files
-.env*.local
-
-# Vercel
-.vercel
-
-# Local Netlify folder
-.netlify
-
-# Debug logs from npm
-npm-debug.log*
-
-# Optional
-.vercel_build_output
+# Gemini artifacts (optional - remove if you want to include)
+.gemini/
