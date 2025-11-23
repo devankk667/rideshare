@@ -2,10 +2,10 @@
     "version": 2,
     "builds": [
         {
-            "src": "RideFlow/package.json",
+            "src": "frontend/package.json",
             "use": "@vercel/static-build",
             "config": {
-                "distDir": "RideFlow/dist"
+                "distDir": "frontend/dist"
             }
         },
         {
@@ -20,7 +20,7 @@
         },
         {
             "src": "/(.*)",
-            "dest": "RideFlow/dist/$1"
+            "dest": "frontend/dist/$1"
         }
     ],
     "env": {

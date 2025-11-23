@@ -61,7 +61,7 @@ npm run dev
 
 ### Frontend Setup
 ```bash
-cd RideFlow
+cd frontend
 npm install
 
 # Start development server
@@ -100,7 +100,7 @@ RIDEFLOW/
 │   │   └── scripts/      # Database setup scripts
 │   └── package.json
 │
-├── RideFlow/             # React frontend
+├── frontend/             # React frontend
 │   ├── src/
 │   │   ├── components/   # Reusable components
 │   │   ├── pages/        # Page components
